@@ -1,4 +1,4 @@
-﻿using ControleGastos.Api.Dtos;
+using ControleGastos.Api.Dtos;
 using ControleGastos.Api.Mappers;
 using ControleGastos.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -31,15 +31,39 @@ public class TransacoesController : ControllerBase
 
         if (resultado.Status == CriarTransacaoStatus.PessoaNaoEncontrada)
         {
-            return NotFound();
+            return PessoaNaoEncontrada();
         }
 
         if (resultado.Status == CriarTransacaoStatus.ReceitaNaoPermitidaParaMenorDeIdade)
         {
-            return BadRequest();
+            return ReceitaNaoPermitidaParaMenorDeIdade();
         }
 
         var transacaoDto = TransacaoMapper.ToDto(resultado.Transacao!);
         return StatusCode(StatusCodes.Status201Created, transacaoDto);
+    }
+
+    private ObjectResult PessoaNaoEncontrada()
+    {
+        return Problem(
+            title: "Pessoa não encontrada",
+            detail: "Não foi encontrada uma pessoa com o identificador informado.",
+            statusCode: StatusCodes.Status404NotFound,
+            extensions: new Dictionary<string, object?>
+            {
+                ["codigo"] = "pessoa_nao_encontrada"
+            });
+    }
+
+    private ObjectResult ReceitaNaoPermitidaParaMenorDeIdade()
+    {
+        return Problem(
+            title: "Transação não permitida",
+            detail: "Pessoas menores de idade só podem cadastrar despesas.",
+            statusCode: StatusCodes.Status400BadRequest,
+            extensions: new Dictionary<string, object?>
+            {
+                ["codigo"] = "receita_nao_permitida_para_menor_de_idade"
+            });
     }
 }

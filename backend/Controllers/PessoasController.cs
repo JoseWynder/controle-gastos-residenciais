@@ -1,4 +1,4 @@
-﻿using ControleGastos.Api.Dtos;
+using ControleGastos.Api.Dtos;
 using ControleGastos.Api.Mappers;
 using ControleGastos.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +30,7 @@ public class PessoasController : ControllerBase
 
         if (pessoa is null)
         {
-            return NotFound();
+            return PessoaNaoEncontrada();
         }
 
         return Ok(PessoaMapper.ToDto(pessoa));
@@ -53,9 +53,21 @@ public class PessoasController : ControllerBase
 
         if (!pessoaFoiDeletada)
         {
-            return NotFound();
+            return PessoaNaoEncontrada();
         }
 
         return NoContent();
+    }
+
+    private ObjectResult PessoaNaoEncontrada()
+    {
+        return Problem(
+            title: "Pessoa não encontrada",
+            detail: "Não foi encontrada uma pessoa com o identificador informado.",
+            statusCode: StatusCodes.Status404NotFound,
+            extensions: new Dictionary<string, object?>
+            {
+                ["codigo"] = "pessoa_nao_encontrada"
+            });
     }
 }
