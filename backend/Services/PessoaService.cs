@@ -20,6 +20,13 @@ public class PessoaService
             .ToListAsync();
     }
 
+    public async Task<Pessoa?> ObterPorIdAsync(int id)
+    {
+        return await _context.Pessoas
+            .AsNoTracking()
+            .FirstOrDefaultAsync(pessoa => pessoa.Id == id);
+    }
+
     public async Task<Pessoa> CriarAsync(Pessoa pessoa)
     {
         _context.Pessoas.Add(pessoa);
