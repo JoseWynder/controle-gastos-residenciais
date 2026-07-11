@@ -2,17 +2,21 @@
 
 Aplicação fullstack para cadastro de pessoas, controle de receitas e despesas residenciais e consulta de totais por pessoa e total geral.
 
+---
+
 ## Funcionalidades
 
-- Cadastro, listagem, consulta e exclusão de pessoas.
+- Cadastro, listagem e exclusão de pessoas.
 - Cadastro e listagem de transações.
 - Visualização dos totais de receitas, despesas e saldo por pessoa.
 - Visualização do total geral de receitas, despesas e saldo líquido.
 - Interface web com áreas de Pessoas, Transações e Totais.
 
+---
+
 ## Regras de negócio
 
-- Uma pessoa possui identificador gerado automaticamente, nome e idade.
+- Uma pessoa é cadastrada com nome e idade.
 - Ao remover uma pessoa, suas transações relacionadas também são removidas.
 - Uma transação pertence a uma pessoa existente.
 - Uma transação pode ser do tipo despesa ou receita.
@@ -21,21 +25,53 @@ Aplicação fullstack para cadastro de pessoas, controle de receitas e despesas 
 - O total geral consolida receitas, despesas e saldo líquido de todas as pessoas.
 - Pessoas sem transações permanecem na consulta de totais com valores zerados.
 
+---
+
+## Modelo de domínio
+
+### Pessoa
+
+Campos:
+
+- `id`
+- `nome`
+- `idade`
+
+Regras e validações:
+
+- identificador gerado automaticamente;
+- nome obrigatório;
+- idade entre 0 e 130 anos.
+
+### Transação
+
+Campos:
+
+- `id`
+- `descricao`
+- `valor`
+- `tipo`
+- `pessoaId`
+
+Regras e validações:
+
+- identificador gerado automaticamente;
+- descrição obrigatória e limitada a 100 caracteres;
+- valor maior que zero;
+- tipo válido, sendo `0` para despesa e `1` para receita;
+- `pessoaId` deve ser maior que zero e identificar uma pessoa existente.
+
+---
+
 ## Tecnologias
 
-- .NET 10
-- ASP.NET Core Web API
-- Entity Framework Core
-- SQLite
-- xUnit
-- React
-- TypeScript
-- Vite
-- npm
-- Vitest
-- React Testing Library
-- jsdom
-- GitHub Actions
+- **Backend** → .NET 10, ASP.NET Core, Entity Framework Core
+- **Persistência** → SQLite, EF Core Migrations
+- **Frontend** → React, TypeScript, Vite, npm
+- **Testes** → xUnit, Vitest, React Testing Library, jsdom
+- **Integração contínua** → GitHub Actions
+
+---
 
 ## Arquitetura
 
@@ -48,6 +84,8 @@ React -> Controllers -> Services -> AppDbContext -> SQLite
 No backend, os controllers recebem requisições HTTP, usam DTOs na entrada e saída e delegam as regras de negócio para os services. Os mappers fazem conversões manuais entre DTOs e entidades. O acesso ao banco é feito diretamente pelo `AppDbContext`, sem uma camada Repository adicional.
 
 No frontend, os componentes consomem a API com `fetch` nativo, mantêm estado local simples e exibem mensagens de carregamento, erro e vazio conforme o retorno da aplicação.
+
+---
 
 ## Estrutura do repositório
 
@@ -72,16 +110,19 @@ No frontend, os componentes consomem a API com `fetch` nativo, mantêm estado lo
 - `.config/dotnet-tools.json`: manifesto da ferramenta local `dotnet-ef`.
 - `ControleGastos.sln`: solution com os projetos .NET.
 
+---
+
 ## Pré-requisitos
 
 - .NET SDK 10
 - Node.js 24
 - npm
-- Git para clonar o repositório
 
 Não é necessário instalar SQLite separadamente. O banco é criado em arquivo local pelo provider SQLite do EF Core.
 
 Também não é necessário instalar o `dotnet-ef` globalmente. O projeto usa uma ferramenta local versionada no repositório.
+
+---
 
 ## Configuração do projeto
 
@@ -110,6 +151,8 @@ dotnet tool run dotnet-ef database update --project backend/ControleGastos.Api.c
 As migrations são aplicadas explicitamente por comando. A aplicação não executa migrations automaticamente no startup.
 
 O arquivo SQLite local não é versionado. Os dados persistem enquanto esse arquivo existir. Se ele for removido, o banco pode ser recriado aplicando as migrations novamente.
+
+##
 
 ### Frontend
 
@@ -142,6 +185,8 @@ VITE_API_URL=http://localhost:5255
 
 O arquivo `frontend/.env.local` é local e não deve ser versionado.
 
+---
+
 ## Execução da aplicação
 
 Use dois terminais: um para o backend e outro para o frontend.
@@ -160,6 +205,8 @@ Com esse perfil, a API fica disponível em:
 http://localhost:5255
 ```
 
+##
+
 ### Terminal 2: frontend
 
 No diretório `frontend`, execute:
@@ -173,6 +220,8 @@ O Vite normalmente disponibiliza a interface em:
 ```text
 http://localhost:5173
 ```
+
+---
 
 ## Endpoints
 
@@ -198,7 +247,122 @@ http://localhost:5173
 | --- | --- | --- |
 | `GET` | `/api/totais` | Consulta totais por pessoa e total geral. |
 
+<br>
+
 Validações e falhas esperadas de negócio retornam respostas estruturadas em `application/problem+json`.
+
+---
+
+## Exemplos da API
+
+<details>
+<summary><code>POST /api/pessoas</code> — Criar pessoa</summary>
+
+<br>
+  
+Requisição:
+
+```json
+{
+  "nome": "Maria",
+  "idade": 32
+}
+```
+
+Resposta `201 Created`:
+
+```json
+{
+  "id": 1,
+  "nome": "Maria",
+  "idade": 32
+}
+```
+
+</details>
+
+<details>
+<summary><code>POST /api/transacoes</code> — Criar transação</summary>
+
+<br>
+
+Requisição:
+
+```json
+{
+  "descricao": "Mercado",
+  "valor": 120.5,
+  "tipo": 0,
+  "pessoaId": 1
+}
+```
+
+Resposta `201 Created`:
+
+```json
+{
+  "id": 1,
+  "descricao": "Mercado",
+  "valor": 120.5,
+  "tipo": 0,
+  "pessoaId": 1
+}
+```
+
+- `0` representa despesa.
+- `1` representa receita.
+
+</details>
+
+<details>
+<summary><code>GET /api/totais</code> — Consultar totais</summary>
+
+<br>
+
+Resposta `200 OK`:
+
+```json
+{
+  "totaisPorPessoa": [
+    {
+      "pessoaId": 1,
+      "nome": "Maria",
+      "totalReceitas": 2000,
+      "totalDespesas": 120.5,
+      "saldo": 1879.5
+    }
+  ],
+  "totalGeral": {
+    "totalReceitas": 2000,
+    "totalDespesas": 120.5,
+    "saldo": 1879.5
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><code>POST /api/transacoes</code> — Receita não permitida para menor</summary>
+
+<br>
+
+Resposta `400 Bad Request`:
+
+```json
+{
+  "title": "Transação não permitida",
+  "status": 400,
+  "detail": "Pessoas menores de idade só podem cadastrar despesas.",
+  "codigo": "receita_nao_permitida_para_menor_de_idade"
+}
+```
+
+Respostas de erro podem conter campos técnicos adicionais, como `traceId`.
+
+</details>
+
+---
 
 ## Testes e verificações
 
@@ -213,6 +377,8 @@ dotnet test ControleGastos.sln
 
 Os testes do backend usam SQLite em memória e cobrem regras de transações, cálculo de totais e exclusão em cascata.
 
+##
+
 ### Frontend
 
 No diretório `frontend`:
@@ -224,6 +390,8 @@ npm test
 ```
 
 Os testes do frontend usam Vitest, jsdom e React Testing Library. Eles validam comportamentos observáveis dos formulários, listas e visualização de totais.
+
+---
 
 ## Integração contínua
 
@@ -238,6 +406,8 @@ O workflow do backend restaura dependências, compila a solution e executa os te
 
 O workflow do frontend instala dependências com `npm ci`, executa lint, build e testes.
 
+---
+
 ## Decisões técnicas
 
 - Controllers são mantidos finos e traduzem requisições e respostas HTTP.
@@ -246,8 +416,8 @@ O workflow do frontend instala dependências com `npm ci`, executa lint, build e
 - Mappers manuais foram usados para evitar dependências desnecessárias.
 - O projeto usa `AppDbContext` diretamente, sem Repository Pattern, mantendo a arquitetura simples.
 - A persistência usa EF Core com SQLite e migrations aplicadas explicitamente.
-- Falhas esperadas de negócio são tratadas por resultados estruturados, sem exceptions para fluxo normal.
-- O handler global é reservado para exceções inesperadas.
+- Falhas esperadas de negócio são tratadas por resultados estruturados, sem usar exceções para controle do fluxo normal.
+- O handler global de exceções é reservado para falhas inesperadas.
 - O frontend usa estado local simples e `fetch` nativo para comunicação com a API.
 - Carregamentos principais usam `AbortController` para evitar atualizações após cancelamento.
 - Após mutações, o frontend atualiza o estado local para manter a interface coerente.
@@ -255,6 +425,8 @@ O workflow do frontend instala dependências com `npm ci`, executa lint, build e
 - Os testes do backend usam SQLite em memória, sem `EFCore.InMemory`, para se aproximar do provider real.
 - Os testes do frontend focam comportamento observável com React Testing Library.
 - Os workflows de CI são separados para backend e frontend.
+
+---
 
 ## Limitações intencionais
 
