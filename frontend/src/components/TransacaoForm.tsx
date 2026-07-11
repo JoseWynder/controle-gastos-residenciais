@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+﻿import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Pessoa } from '../types/pessoa'
 import type { TipoTransacao, Transacao } from '../types/transacao'
@@ -175,10 +175,10 @@ export function TransacaoForm({
   return (
     <form className="transaction-form" noValidate onSubmit={handleSubmit}>
       {!transacoesCarregadasComSucesso && !transacoesCarregando && (
-        <p className="status-message">Carregue as transações antes de cadastrar uma nova.</p>
+        <p className="status-message" role="status">Carregue as transações antes de cadastrar uma nova.</p>
       )}
       {pessoas.length === 0 && !pessoasCarregando && !pessoasErro && (
-        <p className="status-message">Cadastre uma pessoa antes de registrar uma transação.</p>
+        <p className="status-message" role="status">Cadastre uma pessoa antes de registrar uma transação.</p>
       )}
 
       <div className="form-field">
@@ -195,7 +195,7 @@ export function TransacaoForm({
           onChange={(event) => setDescricao(event.target.value)}
         />
         {erros.descricao && (
-          <span className="field-error" id="descricao-transacao-error">
+          <span className="field-error" id="descricao-transacao-error" role="alert">
             {erros.descricao}
           </span>
         )}
@@ -215,7 +215,7 @@ export function TransacaoForm({
           onChange={(event) => setValor(event.target.value)}
         />
         {erros.valor && (
-          <span className="field-error" id="valor-transacao-error">
+          <span className="field-error" id="valor-transacao-error" role="alert">
             {erros.valor}
           </span>
         )}
@@ -237,7 +237,7 @@ export function TransacaoForm({
           <option value="1">Receita</option>
         </select>
         {erros.tipo && (
-          <span className="field-error" id="tipo-transacao-error">
+          <span className="field-error" id="tipo-transacao-error" role="alert">
             {erros.tipo}
           </span>
         )}
@@ -262,13 +262,13 @@ export function TransacaoForm({
           ))}
         </select>
         {erros.pessoaId && (
-          <span className="field-error" id="pessoa-transacao-error">
+          <span className="field-error" id="pessoa-transacao-error" role="alert">
             {erros.pessoaId}
           </span>
         )}
       </div>
 
-      {erroGeral && <p className="status-message error-message">{erroGeral}</p>}
+      {erroGeral && <p className="status-message error-message" role="alert">{erroGeral}</p>}
 
       <button type="submit" disabled={formularioBloqueado}>
         {enviando ? 'Cadastrando...' : 'Cadastrar transação'}

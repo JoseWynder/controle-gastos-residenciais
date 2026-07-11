@@ -1,4 +1,4 @@
-import type { Pessoa } from '../types/pessoa'
+﻿import type { Pessoa } from '../types/pessoa'
 
 type PessoasListProps = {
   pessoas: Pessoa[]
@@ -10,15 +10,15 @@ type PessoasListProps = {
 
 export function PessoasList({ pessoas, carregando, erro, pessoaExcluindoId, onExcluirPessoa }: PessoasListProps) {
   if (carregando) {
-    return <p className="status-message">Carregando pessoas...</p>
+    return <p className="status-message" role="status">Carregando pessoas...</p>
   }
 
   if (erro) {
-    return <p className="status-message error-message">{erro}</p>
+    return <p className="status-message error-message" role="alert">{erro}</p>
   }
 
   if (pessoas.length === 0) {
-    return <p className="status-message">Nenhuma pessoa cadastrada.</p>
+    return <p className="status-message" role="status">Nenhuma pessoa cadastrada.</p>
   }
 
   function handleExcluirPessoa(pessoa: Pessoa) {
@@ -50,6 +50,7 @@ export function PessoasList({ pessoas, carregando, erro, pessoaExcluindoId, onEx
               className="delete-button"
               type="button"
               disabled={exclusaoEmAndamento}
+              aria-label={`${estaExcluindo ? 'Excluindo' : 'Excluir'} ${pessoa.nome}`}
               onClick={() => handleExcluirPessoa(pessoa)}
             >
               {estaExcluindo ? 'Excluindo...' : 'Excluir'}
@@ -60,3 +61,4 @@ export function PessoasList({ pessoas, carregando, erro, pessoaExcluindoId, onEx
     </ul>
   )
 }
+

@@ -58,11 +58,11 @@ function TotalPessoaItem({ total }: { total: TotalPorPessoa }) {
 
 export function TotaisView({ totais, carregando, erro }: TotaisViewProps) {
   if (carregando) {
-    return <p className="status-message">Carregando totais...</p>
+    return <p className="status-message" role="status">Carregando totais...</p>
   }
 
   if (erro) {
-    return <p className="status-message error-message">{erro}</p>
+    return <p className="status-message error-message" role="alert">{erro}</p>
   }
 
   if (!totais) {
@@ -77,7 +77,7 @@ export function TotaisView({ totais, carregando, erro }: TotaisViewProps) {
         <h3 id="totais-pessoas-title">Totais por pessoa</h3>
 
         {totais.totaisPorPessoa.length === 0 ? (
-          <p className="status-message">Nenhuma pessoa cadastrada.</p>
+          <p className="status-message" role="status">Nenhuma pessoa cadastrada.</p>
         ) : (
           <ul className="totals-person-list" aria-label="Totais por pessoa">
             {totais.totaisPorPessoa.map((total) => (
@@ -89,3 +89,4 @@ export function TotaisView({ totais, carregando, erro }: TotaisViewProps) {
     </div>
   )
 }
+

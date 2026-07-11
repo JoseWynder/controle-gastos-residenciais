@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+﻿import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { criarPessoa, ErroValidacaoPessoa } from '../services/pessoasApi'
 import type { Pessoa } from '../types/pessoa'
@@ -117,7 +117,7 @@ export function PessoaForm({ disabled = false, onPessoaCriada }: PessoaFormProps
           onChange={(event) => setNome(event.target.value)}
         />
         {erros.nome && (
-          <span className="field-error" id="nome-error">
+          <span className="field-error" id="nome-error" role="alert">
             {erros.nome}
           </span>
         )}
@@ -139,13 +139,13 @@ export function PessoaForm({ disabled = false, onPessoaCriada }: PessoaFormProps
           onChange={(event) => setIdade(event.target.value)}
         />
         {erros.idade && (
-          <span className="field-error" id="idade-error">
+          <span className="field-error" id="idade-error" role="alert">
             {erros.idade}
           </span>
         )}
       </div>
 
-      {erroGeral && <p className="status-message error-message">{erroGeral}</p>}
+      {erroGeral && <p className="status-message error-message" role="alert">{erroGeral}</p>}
 
       <button type="submit" disabled={formularioBloqueado}>
         {enviando ? 'Cadastrando...' : 'Cadastrar pessoa'}

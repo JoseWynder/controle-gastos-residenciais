@@ -1,4 +1,4 @@
-import type { Pessoa } from '../types/pessoa'
+﻿import type { Pessoa } from '../types/pessoa'
 import type { TipoTransacao, Transacao } from '../types/transacao'
 
 type TransacoesListProps = {
@@ -19,15 +19,15 @@ function obterDescricaoTipo(tipo: TipoTransacao) {
 
 export function TransacoesList({ transacoes, pessoas, carregando, erro }: TransacoesListProps) {
   if (carregando) {
-    return <p className="status-message">Carregando transações...</p>
+    return <p className="status-message" role="status">Carregando transações...</p>
   }
 
   if (erro) {
-    return <p className="status-message error-message">{erro}</p>
+    return <p className="status-message error-message" role="alert">{erro}</p>
   }
 
   if (transacoes.length === 0) {
-    return <p className="status-message">Nenhuma transação cadastrada.</p>
+    return <p className="status-message" role="status">Nenhuma transação cadastrada.</p>
   }
 
   const pessoasPorId = new Map(pessoas.map((pessoa) => [pessoa.id, pessoa.nome]))
