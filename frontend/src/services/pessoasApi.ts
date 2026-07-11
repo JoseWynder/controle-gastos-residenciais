@@ -14,6 +14,13 @@ export class ErroValidacaoPessoa extends Error {
   }
 }
 
+export class ErroPessoaNaoEncontrada extends Error {
+  constructor() {
+    super('Pessoa não encontrada.')
+    this.name = 'ErroPessoaNaoEncontrada'
+  }
+}
+
 function obterApiUrl() {
   const apiUrl = import.meta.env.VITE_API_URL?.trim()
 
@@ -66,4 +73,21 @@ export async function criarPessoa(payload: CriarPessoaPayload): Promise<Pessoa> 
   }
 
   throw new Error('Não foi possível cadastrar a pessoa.')
+}
+
+export async function deletarPessoa(id: number): Promise<void> {
+  const url = criarUrl(`/api/pessoas/${id}`)
+  const response = await fetch(url, {
+    method: 'DELETE',
+  })
+
+  if (response.status === 204) {
+    return
+  }
+
+  if (response.status === 404) {
+    throw new ErroPessoaNaoEncontrada()
+  }
+
+  throw new Error('Não foi possível excluir a pessoa.')
 }

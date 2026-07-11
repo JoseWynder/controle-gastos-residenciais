@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import { PessoaForm } from './components/PessoaForm'
 import { PessoasList } from './components/PessoasList'
-import { listarPessoas } from './services/pessoasApi'
+import { deletarPessoa, ErroPessoaNaoEncontrada, listarPessoas } from './services/pessoasApi'
 import type { Pessoa } from './types/pessoa'
 
 const mensagemErroListagem = 'Não foi possível carregar as pessoas. Verifique se a API está em execução.'
+const mensagemErroExclusao = 'Não foi possível excluir a pessoa. Verifique se a API está em execução.'
+const mensagemPessoaNaoEncontrada = 'A pessoa já não estava disponível e foi removida da listagem.'
 
 function App() {
   const [pessoas, setPessoas] = useState<Pessoa[]>([])
   const [carregandoPessoas, setCarregandoPessoas] = useState(true)
   const [erroListagem, setErroListagem] = useState<string | null>(null)
+  const [pessoaExcluindoId, setPessoaExcluindoId] = useState<number | null>(null)
+  const [erroExclusao, setErroExclusao] = useState<string | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -47,6 +51,29 @@ function App() {
     setErroListagem(null)
   }
 
+  async function handleExcluirPessoa(id: number) {
+    if (pessoaExcluindoId !== null) {
+      return
+    }
+
+    try {
+      setErroExclusao(null)
+      setPessoaExcluindoId(id)
+      await deletarPessoa(id)
+      setPessoas((pessoasAtuais) => pessoasAtuais.filter((pessoa) => pessoa.id !== id))
+      setErroExclusao(null)
+    } catch (error) {
+      if (error instanceof ErroPessoaNaoEncontrada) {
+        setPessoas((pessoasAtuais) => pessoasAtuais.filter((pessoa) => pessoa.id !== id))
+        setErroExclusao(mensagemPessoaNaoEncontrada)
+      } else {
+        setErroExclusao(mensagemErroExclusao)
+      }
+    } finally {
+      setPessoaExcluindoId(null)
+    }
+  }
+
   return (
     <main className="app-shell">
       <section className="intro" aria-labelledby="app-title">
@@ -62,7 +89,14 @@ function App() {
 
       <section className="people-section" aria-labelledby="people-title">
         <h2 id="people-title">Pessoas cadastradas</h2>
-        <PessoasList pessoas={pessoas} carregando={carregandoPessoas} erro={erroListagem} />
+        {erroExclusao && <p className="status-message error-message">{erroExclusao}</p>}
+        <PessoasList
+          pessoas={pessoas}
+          carregando={carregandoPessoas}
+          erro={erroListagem}
+          pessoaExcluindoId={pessoaExcluindoId}
+          onExcluirPessoa={handleExcluirPessoa}
+        />
       </section>
     </main>
   )
