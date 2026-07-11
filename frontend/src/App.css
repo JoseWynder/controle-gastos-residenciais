@@ -42,6 +42,29 @@ h2 {
   color: #4b5563;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.tab-button {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 700;
+  color: #374151;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  border-color: #2563eb;
+  color: #ffffff;
+  background: #2563eb;
+}
+
 .people-section {
   padding-top: 24px;
   border-top: 1px solid #e5e7eb;
@@ -113,7 +136,8 @@ h2 {
   cursor: not-allowed;
 }
 
-.people-list {
+.people-list,
+.transactions-list {
   display: grid;
   gap: 12px;
   padding: 0;
@@ -121,7 +145,8 @@ h2 {
   list-style: none;
 }
 
-.person-item {
+.person-item,
+.transaction-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -132,22 +157,44 @@ h2 {
   background: #ffffff;
 }
 
-.person-info {
+.person-info,
+.transaction-main,
+.transaction-details {
   display: grid;
   gap: 4px;
 }
 
-.person-info strong {
+.person-info strong,
+.transaction-main strong {
   color: #111827;
 }
 
-.person-info span {
+.person-info span,
+.transaction-main span,
+.transaction-details span {
   color: #4b5563;
 }
 
 .delete-button {
   flex: 0 0 auto;
   background: #b91c1c;
+}
+
+.transaction-details {
+  justify-items: end;
+  text-align: right;
+}
+
+.transaction-type {
+  font-weight: 700;
+}
+
+.transaction-type.income {
+  color: #047857;
+}
+
+.transaction-type.expense {
+  color: #b91c1c;
 }
 
 .status-message {
