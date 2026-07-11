@@ -1,12 +1,25 @@
-# Controle de Gastos Residenciais
+﻿# Controle de Gastos Residenciais
 
-API para controle de gastos residenciais, com cadastro de pessoas, registro de transações e consulta de totais por pessoa e total geral.
+Aplicação fullstack para cadastro de pessoas, controle de receitas e despesas residenciais e consulta de totais por pessoa e total geral.
 
-## Status atual
+## Funcionalidades
 
-O backend está funcional, com persistência em SQLite, migrations, tratamento de erros, testes automatizados essenciais e workflow de CI.
+- Cadastro, listagem, consulta e exclusão de pessoas.
+- Cadastro e listagem de transações.
+- Visualização dos totais de receitas, despesas e saldo por pessoa.
+- Visualização do total geral de receitas, despesas e saldo líquido.
+- Interface web com áreas de Pessoas, Transações e Totais.
 
-O frontend ainda será desenvolvido em uma etapa futura.
+## Regras de negócio
+
+- Uma pessoa possui identificador gerado automaticamente, nome e idade.
+- Ao remover uma pessoa, suas transações relacionadas também são removidas.
+- Uma transação pertence a uma pessoa existente.
+- Uma transação pode ser do tipo despesa ou receita.
+- Pessoas menores de 18 anos só podem cadastrar despesas.
+- Os totais por pessoa exibem receitas, despesas e saldo, calculado como receitas menos despesas.
+- O total geral consolida receitas, despesas e saldo líquido de todas as pessoas.
+- Pessoas sem transações permanecem na consulta de totais com valores zerados.
 
 ## Tecnologias
 
@@ -14,117 +27,239 @@ O frontend ainda será desenvolvido em uma etapa futura.
 - ASP.NET Core Web API
 - Entity Framework Core
 - SQLite
-- EF Core Migrations
 - xUnit
+- React
+- TypeScript
+- Vite
+- npm
+- Vitest
+- React Testing Library
+- jsdom
 - GitHub Actions
+
+## Arquitetura
+
+O fluxo principal da aplicação é simples:
+
+```text
+React -> Controllers -> Services -> AppDbContext -> SQLite
+```
+
+No backend, os controllers recebem requisições HTTP, usam DTOs na entrada e saída e delegam as regras de negócio para os services. Os mappers fazem conversões manuais entre DTOs e entidades. O acesso ao banco é feito diretamente pelo `AppDbContext`, sem uma camada Repository adicional.
+
+No frontend, os componentes consomem a API com `fetch` nativo, mantêm estado local simples e exibem mensagens de carregamento, erro e vazio conforme o retorno da aplicação.
+
+## Estrutura do repositório
+
+```text
+.
+├── .config/
+│   └── dotnet-tools.json
+├── .github/
+│   └── workflows/
+├── backend/
+├── backend.Tests/
+├── frontend/
+├── .gitignore
+├── ControleGastos.sln
+└── README.md
+```
+
+- `backend/`: API ASP.NET Core, entidades, DTOs, controllers, services, mappers, migrations e configuração de persistência.
+- `backend.Tests/`: testes automatizados do backend.
+- `frontend/`: aplicação React com TypeScript.
+- `.github/workflows/`: workflows de integração contínua.
+- `.config/dotnet-tools.json`: manifesto da ferramenta local `dotnet-ef`.
+- `ControleGastos.sln`: solution com os projetos .NET.
 
 ## Pré-requisitos
 
-- .NET SDK 10 instalado
-- Terminal ou PowerShell
-- Acesso ao repositório clonado localmente
+- .NET SDK 10
+- Node.js 24
+- npm
+- Git para clonar o repositório
 
-Não é necessário instalar o `dotnet-ef` globalmente. O projeto usa ferramenta local versionada no repositório.
+Não é necessário instalar SQLite separadamente. O banco é criado em arquivo local pelo provider SQLite do EF Core.
 
-## Configuração inicial
+Também não é necessário instalar o `dotnet-ef` globalmente. O projeto usa uma ferramenta local versionada no repositório.
+
+## Configuração do projeto
 
 Execute os comandos a partir da raiz do repositório.
 
-Restaure as ferramentas locais:
+### Backend
 
-```powershell
+Restaure a ferramenta local do EF Core:
+
+```bash
 dotnet tool restore
 ```
 
 Restaure as dependências da solution:
 
-```powershell
+```bash
 dotnet restore ControleGastos.sln
 ```
 
-## Banco de dados e migrations
+Crie ou atualize o banco SQLite local aplicando as migrations:
 
-A aplicação usa SQLite com EF Core Migrations. O arquivo do banco é local e não versionado.
-
-Os dados persistem enquanto o arquivo SQLite existir. Se o arquivo for excluído, os dados também serão removidos. O banco pode ser recriado aplicando as migrations novamente.
-
-A aplicação não aplica migrations automaticamente no startup. Para criar ou atualizar o banco local, execute:
-
-```powershell
+```bash
 dotnet tool run dotnet-ef database update --project backend/ControleGastos.Api.csproj --startup-project backend/ControleGastos.Api.csproj
 ```
 
-## Execução da API
+As migrations são aplicadas explicitamente por comando. A aplicação não executa migrations automaticamente no startup.
 
-Execute a API com:
+O arquivo SQLite local não é versionado. Os dados persistem enquanto esse arquivo existir. Se ele for removido, o banco pode ser recriado aplicando as migrations novamente.
 
-```powershell
-dotnet run --project backend/ControleGastos.Api.csproj
+### Frontend
+
+Instale as dependências do frontend:
+
+```bash
+cd frontend
+npm ci
 ```
 
-Use a URL exibida no terminal após a inicialização da aplicação. Os perfis de desenvolvimento estão em `backend/Properties/launchSettings.json`.
+Crie o arquivo local de ambiente a partir do exemplo versionado.
 
-## Build e testes
-
-Para compilar a solution:
+No PowerShell:
 
 ```powershell
-dotnet build ControleGastos.sln
+Copy-Item .env.example .env.local
 ```
 
-Para executar os testes automatizados:
+Em sistemas compatíveis com `cp`:
 
-```powershell
-dotnet test ControleGastos.sln
+```bash
+cp .env.example .env.local
 ```
 
-Os testes usam SQLite em memória e não dependem do banco local da aplicação. A suíte atual cobre regras de transações, cálculo de totais e exclusão em cascata.
+O conteúdo esperado é:
+
+```env
+VITE_API_URL=http://localhost:5255
+```
+
+O arquivo `frontend/.env.local` é local e não deve ser versionado.
+
+## Execução da aplicação
+
+Use dois terminais: um para o backend e outro para o frontend.
+
+### Terminal 1: backend
+
+Na raiz do repositório, execute:
+
+```bash
+dotnet run --project backend/ControleGastos.Api.csproj --launch-profile http
+```
+
+Com esse perfil, a API fica disponível em:
+
+```text
+http://localhost:5255
+```
+
+### Terminal 2: frontend
+
+No diretório `frontend`, execute:
+
+```bash
+npm run dev
+```
+
+O Vite normalmente disponibiliza a interface em:
+
+```text
+http://localhost:5173
+```
 
 ## Endpoints
 
 ### Pessoas
 
-- `GET /api/pessoas`
-- `GET /api/pessoas/{id}`
-- `POST /api/pessoas`
-- `DELETE /api/pessoas/{id}`
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/api/pessoas` | Lista pessoas cadastradas. |
+| `GET` | `/api/pessoas/{id}` | Consulta uma pessoa por identificador. |
+| `POST` | `/api/pessoas` | Cria uma pessoa. |
+| `DELETE` | `/api/pessoas/{id}` | Remove uma pessoa e suas transações relacionadas. |
 
 ### Transações
 
-- `GET /api/transacoes`
-- `POST /api/transacoes`
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/api/transacoes` | Lista transações cadastradas. |
+| `POST` | `/api/transacoes` | Cria uma transação. |
 
 ### Totais
 
-- `GET /api/totais`
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/api/totais` | Consulta totais por pessoa e total geral. |
 
-## Regras de negócio
+Validações e falhas esperadas de negócio retornam respostas estruturadas em `application/problem+json`.
 
-- Pessoas podem ser criadas, listadas, consultadas por id e removidas.
-- Ao remover uma pessoa, suas transações relacionadas são removidas por cascade delete.
-- Uma transação só pode ser criada para uma pessoa existente.
-- Pessoas menores de idade só podem cadastrar despesas.
-- Pessoas sem transações aparecem na consulta de totais com receitas, despesas e saldo zerados.
-- O saldo é calculado como total de receitas menos total de despesas.
-- O total geral consolida as receitas, despesas e saldos de todas as pessoas.
+## Testes e verificações
 
-## Decisões técnicas
+### Backend
 
-- Controllers são mantidos finos e ficam responsáveis por receber DTOs, chamar mappers e traduzir resultados em respostas HTTP.
-- Services concentram regras de negócio e trabalham com entidades, sem conhecer DTOs.
-- DTOs e mappers manuais ficam na borda da API.
-- O projeto usa `AppDbContext` diretamente, sem Repository Pattern.
-- As migrations são aplicadas explicitamente por comando.
-- Falhas esperadas de negócio são representadas por resultados estruturados, sem uso de exceptions para fluxo normal.
-- O handler global é reservado para exceções inesperadas.
-- Os testes usam SQLite em memória, sem `EFCore.InMemory`, para se aproximar do provider real usado pela aplicação.
+Na raiz do repositório:
+
+```bash
+dotnet build ControleGastos.sln
+dotnet test ControleGastos.sln
+```
+
+Os testes do backend usam SQLite em memória e cobrem regras de transações, cálculo de totais e exclusão em cascata.
+
+### Frontend
+
+No diretório `frontend`:
+
+```bash
+npm run lint
+npm run build
+npm test
+```
+
+Os testes do frontend usam Vitest, jsdom e React Testing Library. Eles validam comportamentos observáveis dos formulários, listas e visualização de totais.
 
 ## Integração contínua
 
-O GitHub Actions executa restore, build e testes em pull requests direcionados à `master` e em pushes na `master`.
+O projeto possui dois workflows no GitHub Actions:
 
-O workflow está em `.github/workflows/backend-ci.yml`.
+- `.github/workflows/backend-ci.yml`
+- `.github/workflows/frontend-ci.yml`
 
-## Frontend
+Ambos executam em push para `master` e em pull requests direcionados à `master`.
 
-O frontend ainda será desenvolvido. Esta documentação descreve o estado atual do backend.
+O workflow do backend restaura dependências, compila a solution e executa os testes .NET.
+
+O workflow do frontend instala dependências com `npm ci`, executa lint, build e testes.
+
+## Decisões técnicas
+
+- Controllers são mantidos finos e traduzem requisições e respostas HTTP.
+- Services concentram regras de negócio e trabalham com entidades.
+- DTOs ficam nas fronteiras da API para separar contratos HTTP das entidades persistidas.
+- Mappers manuais foram usados para evitar dependências desnecessárias.
+- O projeto usa `AppDbContext` diretamente, sem Repository Pattern, mantendo a arquitetura simples.
+- A persistência usa EF Core com SQLite e migrations aplicadas explicitamente.
+- Falhas esperadas de negócio são tratadas por resultados estruturados, sem exceptions para fluxo normal.
+- O handler global é reservado para exceções inesperadas.
+- O frontend usa estado local simples e `fetch` nativo para comunicação com a API.
+- Carregamentos principais usam `AbortController` para evitar atualizações após cancelamento.
+- Após mutações, o frontend atualiza o estado local para manter a interface coerente.
+- Os totais são sempre consumidos do backend, sem cálculo local no frontend.
+- Os testes do backend usam SQLite em memória, sem `EFCore.InMemory`, para se aproximar do provider real.
+- Os testes do frontend focam comportamento observável com React Testing Library.
+- Os workflows de CI são separados para backend e frontend.
+
+## Limitações intencionais
+
+- Não há edição ou exclusão de transações.
+- Não há autenticação ou autorização.
+- Não há gráficos ou dashboard visual avançado.
+- Não há deploy configurado.
+- A navegação do frontend é simples, sem múltiplas páginas ou React Router.
