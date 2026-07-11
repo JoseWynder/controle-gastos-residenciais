@@ -1,13 +1,12 @@
 .app-shell {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+  width: min(100%, 880px);
+  margin: 0 auto;
+  padding: 48px 24px;
 }
 
 .intro {
-  width: min(100%, 640px);
-  text-align: center;
+  margin-bottom: 32px;
 }
 
 .eyebrow {
@@ -19,20 +18,66 @@
   color: #2563eb;
 }
 
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
 h1 {
-  margin: 0 0 16px;
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 16px;
+  font-size: clamp(2rem, 5vw, 3.25rem);
   line-height: 1.1;
   color: #111827;
 }
 
-p {
-  margin: 0;
-  font-size: 1.125rem;
-  color: #374151;
+h2 {
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: #111827;
 }
 
-.support {
-  margin-top: 8px;
-  color: #6b7280;
+.support,
+.status-message {
+  color: #4b5563;
+}
+
+.people-section {
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.people-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.person-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.person-item strong {
+  color: #111827;
+}
+
+.person-item span {
+  color: #4b5563;
+}
+
+.status-message {
+  margin-bottom: 0;
+}
+
+.error-message {
+  color: #b91c1c;
 }
