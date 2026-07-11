@@ -74,7 +74,8 @@ h2 {
   margin-top: 32px;
 }
 
-.person-form {
+.person-form,
+.transaction-form {
   display: grid;
   gap: 16px;
   max-width: 480px;
@@ -90,7 +91,8 @@ h2 {
   color: #111827;
 }
 
-.form-field input {
+.form-field input,
+.form-field select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #d1d5db;
@@ -100,12 +102,14 @@ h2 {
   background: #ffffff;
 }
 
-.form-field input:disabled {
+.form-field input:disabled,
+.form-field select:disabled {
   color: #6b7280;
   background: #f3f4f6;
 }
 
-.form-field input[aria-invalid='true'] {
+.form-field input[aria-invalid='true'],
+.form-field select[aria-invalid='true'] {
   border-color: #b91c1c;
 }
 
@@ -115,6 +119,7 @@ h2 {
 }
 
 .person-form button,
+.transaction-form button,
 .delete-button {
   padding: 10px 14px;
   border: 0;
@@ -126,11 +131,13 @@ h2 {
   cursor: pointer;
 }
 
-.person-form button {
+.person-form button,
+.transaction-form button {
   justify-self: start;
 }
 
 .person-form button:disabled,
+.transaction-form button:disabled,
 .delete-button:disabled {
   background: #9ca3af;
   cursor: not-allowed;

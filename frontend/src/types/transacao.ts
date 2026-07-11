@@ -7,3 +7,10 @@ export type Transacao = {
   tipo: TipoTransacao
   pessoaId: number
 }
+
+export type CriarTransacaoPayload = {
+  descricao: string
+  valor: number
+  tipo: TipoTransacao
+  pessoaId: number
+}

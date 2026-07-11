@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { PessoaForm } from './components/PessoaForm'
 import { PessoasList } from './components/PessoasList'
+import { TransacaoForm } from './components/TransacaoForm'
 import { TransacoesList } from './components/TransacoesList'
 import { deletarPessoa, ErroPessoaNaoEncontrada, listarPessoas } from './services/pessoasApi'
 import { listarTransacoes } from './services/transacoesApi'
@@ -105,6 +106,11 @@ function App() {
     setErroListagem(null)
   }
 
+  function handleTransacaoCriada(transacao: Transacao) {
+    setTransacoes((transacoesAtuais) => [...transacoesAtuais, transacao])
+    setErroTransacoes(null)
+  }
+
   function removerPessoaETransacoesRelacionadas(id: number) {
     setPessoas((pessoasAtuais) => pessoasAtuais.filter((pessoa) => pessoa.id !== id))
     setTransacoes((transacoesAtuais) => transacoesAtuais.filter((transacao) => transacao.pessoaId !== id))
@@ -182,15 +188,30 @@ function App() {
       )}
 
       {abaAtiva === 'transacoes' && (
-        <section className="people-section" aria-labelledby="transactions-title">
-          <h2 id="transactions-title">Transações cadastradas</h2>
-          <TransacoesList
-            transacoes={transacoes}
-            pessoas={pessoas}
-            carregando={carregandoTransacoes}
-            erro={erroTransacoes}
-          />
-        </section>
+        <>
+          <section className="people-section" aria-labelledby="transaction-form-title">
+            <h2 id="transaction-form-title">Cadastrar transação</h2>
+            <TransacaoForm
+              pessoas={pessoas}
+              pessoasCarregando={carregandoPessoas}
+              pessoasErro={erroListagem}
+              transacoesCarregando={carregandoTransacoes}
+              transacoesCarregadasComSucesso={transacoesCarregadasComSucesso}
+              onTransacaoCriada={handleTransacaoCriada}
+              onPessoaInvalida={removerPessoaETransacoesRelacionadas}
+            />
+          </section>
+
+          <section className="people-section" aria-labelledby="transactions-title">
+            <h2 id="transactions-title">Transações cadastradas</h2>
+            <TransacoesList
+              transacoes={transacoes}
+              pessoas={pessoas}
+              carregando={carregandoTransacoes}
+              erro={erroTransacoes}
+            />
+          </section>
+        </>
       )}
     </main>
   )
