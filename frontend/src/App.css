@@ -1,4 +1,4 @@
-.app-shell {
+﻿.app-shell {
   min-height: 100vh;
   width: min(100%, 880px);
   margin: 0 auto;
@@ -211,3 +211,59 @@ h2 {
 .error-message {
   color: #b91c1c;
 }
+.totals-view {
+  display: grid;
+  gap: 24px;
+}
+
+.totals-summary,
+.total-person-item {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.totals-summary h3,
+.total-person-item h3,
+.totals-view h3 {
+  margin: 0;
+  color: #111827;
+}
+
+.totals-person-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 16px 0 0;
+  list-style: none;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #4b5563;
+}
+
+.total-value {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.total-value.income,
+.total-value.positive {
+  color: #047857;
+}
+
+.total-value.expense,
+.total-value.negative {
+  color: #b91c1c;
+}
+
+.total-value.neutral {
+  color: #374151;
+}
+

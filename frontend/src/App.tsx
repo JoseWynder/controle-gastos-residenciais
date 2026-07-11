@@ -1,20 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { PessoaForm } from './components/PessoaForm'
 import { PessoasList } from './components/PessoasList'
+import { TotaisView } from './components/TotaisView'
 import { TransacaoForm } from './components/TransacaoForm'
 import { TransacoesList } from './components/TransacoesList'
 import { deletarPessoa, ErroPessoaNaoEncontrada, listarPessoas } from './services/pessoasApi'
+import { obterTotais } from './services/totaisApi'
 import { listarTransacoes } from './services/transacoesApi'
 import type { Pessoa } from './types/pessoa'
+import type { Totais } from './types/totais'
 import type { Transacao } from './types/transacao'
 
 const mensagemErroListagem = 'Não foi possível carregar as pessoas. Verifique se a API está em execução.'
 const mensagemErroExclusao = 'Não foi possível excluir a pessoa. Verifique se a API está em execução.'
 const mensagemPessoaNaoEncontrada = 'A pessoa já não estava disponível e foi removida da listagem.'
 const mensagemErroTransacoes = 'Não foi possível carregar as transações. Verifique se a API está em execução.'
+const mensagemErroTotais = 'Não foi possível carregar os totais. Verifique se a API está em execução.'
 
-type AbaAtiva = 'pessoas' | 'transacoes'
+type AbaAtiva = 'pessoas' | 'transacoes' | 'totais'
 
 function App() {
   const [abaAtiva, setAbaAtiva] = useState<AbaAtiva>('pessoas')
@@ -27,7 +31,11 @@ function App() {
   const [carregandoTransacoes, setCarregandoTransacoes] = useState(false)
   const [erroTransacoes, setErroTransacoes] = useState<string | null>(null)
   const [transacoesCarregadasComSucesso, setTransacoesCarregadasComSucesso] = useState(false)
+  const [totais, setTotais] = useState<Totais | null>(null)
+  const [carregandoTotais, setCarregandoTotais] = useState(false)
+  const [erroTotais, setErroTotais] = useState<string | null>(null)
   const cargaTransacoesEmAndamento = useRef(false)
+  const cargaTotaisId = useRef(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -101,6 +109,49 @@ function App() {
     }
   }, [abaAtiva, transacoesCarregadasComSucesso])
 
+  useEffect(() => {
+    if (abaAtiva !== 'totais') {
+      return
+    }
+
+    const controller = new AbortController()
+    const cargaAtualId = cargaTotaisId.current + 1
+    cargaTotaisId.current = cargaAtualId
+
+    async function carregarTotais() {
+      try {
+        setCarregandoTotais(true)
+        setErroTotais(null)
+        setTotais(null)
+
+        const totaisCarregados = await obterTotais(controller.signal)
+
+        if (controller.signal.aborted || cargaTotaisId.current !== cargaAtualId) {
+          return
+        }
+
+        setTotais(totaisCarregados)
+      } catch {
+        if (controller.signal.aborted || cargaTotaisId.current !== cargaAtualId) {
+          return
+        }
+
+        setErroTotais(mensagemErroTotais)
+        setTotais(null)
+      } finally {
+        if (!controller.signal.aborted && cargaTotaisId.current === cargaAtualId) {
+          setCarregandoTotais(false)
+        }
+      }
+    }
+
+    void carregarTotais()
+
+    return () => {
+      controller.abort()
+    }
+  }, [abaAtiva])
+
   function handlePessoaCriada(pessoa: Pessoa) {
     setPessoas((pessoasAtuais) => [...pessoasAtuais, pessoa])
     setErroListagem(null)
@@ -164,6 +215,14 @@ function App() {
         >
           Transações
         </button>
+        <button
+          className={`tab-button ${abaAtiva === 'totais' ? 'active' : ''}`}
+          type="button"
+          aria-pressed={abaAtiva === 'totais'}
+          onClick={() => setAbaAtiva('totais')}
+        >
+          Totais
+        </button>
       </div>
 
       {abaAtiva === 'pessoas' && (
@@ -212,6 +271,13 @@ function App() {
             />
           </section>
         </>
+      )}
+
+      {abaAtiva === 'totais' && (
+        <section className="people-section" aria-labelledby="totals-title">
+          <h2 id="totals-title">Totais</h2>
+          <TotaisView totais={totais} carregando={carregandoTotais} erro={erroTotais} />
+        </section>
       )}
     </main>
   )
