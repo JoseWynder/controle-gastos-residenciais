@@ -1,7 +1,6 @@
-using ControleGastos.Api.Data;
 using ControleGastos.Api.Entities;
 using ControleGastos.Api.Services;
-using Microsoft.Data.Sqlite;
+using ControleGastos.Api.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -12,10 +11,9 @@ public class TransacaoServiceTests
     [Fact]
     public async Task CriarAsync_DeveRetornarPessoaNaoEncontrada_QuandoPessoaNaoExiste()
     {
-        using var connection = CriarConexaoAberta();
-        await CriarBancoAsync(connection);
+        await using var database = await SqliteTestDatabase.CreateAsync();
 
-        var resultado = await CriarTransacaoAsync(connection, new Transacao
+        var resultado = await CriarTransacaoAsync(database, new Transacao
         {
             Descricao = "Compra",
             Valor = 10m,
@@ -23,7 +21,7 @@ public class TransacaoServiceTests
             PessoaId = 999
         });
 
-        var transacoes = await ListarTransacoesPersistidasAsync(connection);
+        var transacoes = await ListarTransacoesPersistidasAsync(database);
 
         Assert.Equal(CriarTransacaoStatus.PessoaNaoEncontrada, resultado.Status);
         Assert.Null(resultado.Transacao);
@@ -33,11 +31,10 @@ public class TransacaoServiceTests
     [Fact]
     public async Task CriarAsync_DeveBloquearReceita_QuandoPessoaTem17Anos()
     {
-        using var connection = CriarConexaoAberta();
-        await CriarBancoAsync(connection);
-        var pessoa = await AdicionarPessoaAsync(connection, "Menor", 17);
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var pessoa = await AdicionarPessoaAsync(database, "Menor", 17);
 
-        var resultado = await CriarTransacaoAsync(connection, new Transacao
+        var resultado = await CriarTransacaoAsync(database, new Transacao
         {
             Descricao = "Receita",
             Valor = 50m,
@@ -45,7 +42,7 @@ public class TransacaoServiceTests
             PessoaId = pessoa.Id
         });
 
-        var transacoes = await ListarTransacoesPersistidasAsync(connection);
+        var transacoes = await ListarTransacoesPersistidasAsync(database);
 
         Assert.Equal(CriarTransacaoStatus.ReceitaNaoPermitidaParaMenorDeIdade, resultado.Status);
         Assert.Null(resultado.Transacao);
@@ -55,11 +52,10 @@ public class TransacaoServiceTests
     [Fact]
     public async Task CriarAsync_DevePermitirDespesa_QuandoPessoaTem17Anos()
     {
-        using var connection = CriarConexaoAberta();
-        await CriarBancoAsync(connection);
-        var pessoa = await AdicionarPessoaAsync(connection, "Menor", 17);
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var pessoa = await AdicionarPessoaAsync(database, "Menor", 17);
 
-        var resultado = await CriarTransacaoAsync(connection, new Transacao
+        var resultado = await CriarTransacaoAsync(database, new Transacao
         {
             Descricao = "Lanche",
             Valor = 12m,
@@ -67,7 +63,7 @@ public class TransacaoServiceTests
             PessoaId = pessoa.Id
         });
 
-        var transacoes = await ListarTransacoesPersistidasAsync(connection);
+        var transacoes = await ListarTransacoesPersistidasAsync(database);
 
         Assert.Equal(CriarTransacaoStatus.Sucesso, resultado.Status);
         Assert.NotNull(resultado.Transacao);
@@ -81,11 +77,10 @@ public class TransacaoServiceTests
     [Fact]
     public async Task CriarAsync_DevePermitirReceita_QuandoPessoaTem18Anos()
     {
-        using var connection = CriarConexaoAberta();
-        await CriarBancoAsync(connection);
-        var pessoa = await AdicionarPessoaAsync(connection, "Adulto", 18);
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var pessoa = await AdicionarPessoaAsync(database, "Adulto", 18);
 
-        var resultado = await CriarTransacaoAsync(connection, new Transacao
+        var resultado = await CriarTransacaoAsync(database, new Transacao
         {
             Descricao = "Salario",
             Valor = 100m,
@@ -93,7 +88,7 @@ public class TransacaoServiceTests
             PessoaId = pessoa.Id
         });
 
-        var transacoes = await ListarTransacoesPersistidasAsync(connection);
+        var transacoes = await ListarTransacoesPersistidasAsync(database);
 
         Assert.Equal(CriarTransacaoStatus.Sucesso, resultado.Status);
         Assert.NotNull(resultado.Transacao);
@@ -104,29 +99,9 @@ public class TransacaoServiceTests
         Assert.Equal(pessoa.Id, transacoes[0].PessoaId);
     }
 
-    private static SqliteConnection CriarConexaoAberta()
+    private static async Task<Pessoa> AdicionarPessoaAsync(SqliteTestDatabase database, string nome, int idade)
     {
-        var connection = new SqliteConnection("DataSource=:memory:");
-        connection.Open();
-        return connection;
-    }
-
-    private static DbContextOptions<AppDbContext> CriarOptions(SqliteConnection connection)
-    {
-        return new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite(connection)
-            .Options;
-    }
-
-    private static async Task CriarBancoAsync(SqliteConnection connection)
-    {
-        await using var context = new AppDbContext(CriarOptions(connection));
-        await context.Database.EnsureCreatedAsync();
-    }
-
-    private static async Task<Pessoa> AdicionarPessoaAsync(SqliteConnection connection, string nome, int idade)
-    {
-        await using var context = new AppDbContext(CriarOptions(connection));
+        await using var context = database.CreateContext();
         var pessoa = new Pessoa
         {
             Nome = nome,
@@ -140,18 +115,18 @@ public class TransacaoServiceTests
     }
 
     private static async Task<CriarTransacaoResultado> CriarTransacaoAsync(
-        SqliteConnection connection,
+        SqliteTestDatabase database,
         Transacao transacao)
     {
-        await using var context = new AppDbContext(CriarOptions(connection));
+        await using var context = database.CreateContext();
         var service = new TransacaoService(context);
 
         return await service.CriarAsync(transacao);
     }
 
-    private static async Task<List<Transacao>> ListarTransacoesPersistidasAsync(SqliteConnection connection)
+    private static async Task<List<Transacao>> ListarTransacoesPersistidasAsync(SqliteTestDatabase database)
     {
-        await using var context = new AppDbContext(CriarOptions(connection));
+        await using var context = database.CreateContext();
 
         return await context.Transacoes
             .AsNoTracking()
