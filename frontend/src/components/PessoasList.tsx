@@ -1,44 +1,12 @@
-import { useEffect, useState } from 'react'
-import { listarPessoas } from '../services/pessoasApi'
 import type { Pessoa } from '../types/pessoa'
 
-const mensagemErro = 'Não foi possível carregar as pessoas. Verifique se a API está em execução.'
+type PessoasListProps = {
+  pessoas: Pessoa[]
+  carregando: boolean
+  erro: string | null
+}
 
-export function PessoasList() {
-  const [pessoas, setPessoas] = useState<Pessoa[]>([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState<string | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    async function carregarPessoas() {
-      try {
-        setCarregando(true)
-        setErro(null)
-        const pessoasCarregadas = await listarPessoas(controller.signal)
-        setPessoas(pessoasCarregadas)
-      } catch {
-        if (controller.signal.aborted) {
-          return
-        }
-
-        setErro(mensagemErro)
-        setPessoas([])
-      } finally {
-        if (!controller.signal.aborted) {
-          setCarregando(false)
-        }
-      }
-    }
-
-    void carregarPessoas()
-
-    return () => {
-      controller.abort()
-    }
-  }, [])
-
+export function PessoasList({ pessoas, carregando, erro }: PessoasListProps) {
   if (carregando) {
     return <p className="status-message">Carregando pessoas...</p>
   }

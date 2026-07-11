@@ -47,6 +47,67 @@ h2 {
   border-top: 1px solid #e5e7eb;
 }
 
+.people-section + .people-section {
+  margin-top: 32px;
+}
+
+.person-form {
+  display: grid;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.form-field label {
+  font-weight: 700;
+  color: #111827;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font: inherit;
+  color: #111827;
+  background: #ffffff;
+}
+
+.form-field input:disabled {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.form-field input[aria-invalid='true'] {
+  border-color: #b91c1c;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.person-form button {
+  justify-self: start;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 700;
+  color: #ffffff;
+  background: #2563eb;
+  cursor: pointer;
+}
+
+.person-form button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
 .people-list {
   display: grid;
   gap: 12px;
