@@ -35,6 +35,7 @@ function App() {
   const [carregandoTotais, setCarregandoTotais] = useState(false)
   const [erroTotais, setErroTotais] = useState<string | null>(null)
   const cargaTransacoesEmAndamento = useRef(false)
+  // Identifica a carga mais recente para ignorar respostas obsoletas.
   const cargaTotaisId = useRef(0)
 
   useEffect(() => {
@@ -162,6 +163,7 @@ function App() {
     setErroTransacoes(null)
   }
 
+  // Mantém o estado local coerente com o cascade delete aplicado pelo backend.
   function removerPessoaETransacoesRelacionadas(id: number) {
     setPessoas((pessoasAtuais) => pessoasAtuais.filter((pessoa) => pessoa.id !== id))
     setTransacoes((transacoesAtuais) => transacoesAtuais.filter((transacao) => transacao.pessoaId !== id))
@@ -284,3 +286,4 @@ function App() {
 }
 
 export default App
+

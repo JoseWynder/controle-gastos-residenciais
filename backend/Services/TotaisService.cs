@@ -20,6 +20,7 @@ public class TotaisService
             .Include(pessoa => pessoa.Transacoes)
             .ToListAsync();
 
+        // Calcula os totais sob demanda e mantém no resultado pessoas sem transações.
         var totaisPorPessoa = pessoas
             .Select(pessoa =>
             {
@@ -66,3 +67,4 @@ public record TotalGeralResultado(
 public record TotaisResultado(
     List<TotalPessoaResultado> TotaisPorPessoa,
     TotalGeralResultado TotalGeral);
+
