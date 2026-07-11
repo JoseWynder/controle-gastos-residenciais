@@ -18,6 +18,7 @@ obj/
 # Environment files
 .env
 .env.*
+!frontend/.env.example
 
 # SQLite local database
 *.db
